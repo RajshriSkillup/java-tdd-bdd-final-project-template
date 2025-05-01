@@ -99,7 +99,39 @@ public class ProductControllerTest {
         // Verify service was never called with invalid data
         verify(productService, never()).create(any(Product.class));
     }
-
-    
-   
+    @Test
+    public void testGetProduct() throws Exception {
+        // Create a product for testing
+        Product product = createProductFixture();
+        
+        // Mock the service method
+        when(productService.findById(product.getId())).thenReturn(product);
+        
+        // Make the request and validate
+        mockMvc.perform(get("/products/" + product.getId())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(product.getId()))
+                .andExpect(jsonPath("$.name").value(product.getName()))
+                .andExpect(jsonPath("$.description").value(product.getDescription()))
+                .andExpect(jsonPath("$.price").value(product.getPrice().doubleValue()))
+                .andExpect(jsonPath("$.available").value(product.getAvailable()))
+                .andExpect(jsonPath("$.category").value(product.getCategory().toString()));
+                
+        verify(productService).findById(product.getId());
+    }
+    @Test
+    public void testGetProductNotFound() throws Exception {
+        // Mock the service to throw an exception
+        when(productService.findById(99L))
+                .thenThrow(new ProductNotFoundException("Product with ID 99 not found"));
+        
+        // Make the request and validate
+        mockMvc.perform(get("/products/99")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Product with ID 99 not found"));
+                
+        verify(productService).findById(99L);
+    }
 }
