@@ -119,7 +119,33 @@ public class WebSteps {
         i_set_the_to(field, value);
     }
     
+    @When("I press the {string} button")
+    public void i_press_the_button(String buttonName) {
+        // Updated to match the HTML structure with buttonName-btn format
+        String id = buttonName.toLowerCase() + "-btn";
+        WebElement button = driver.findElement(By.id(id));
+        button.click();
+    }
+
+    @Then("I should see {string} in the results")
+    public void i_should_see_in_the_results(String text) {
+        WebElement results = driver.findElement(By.id("search_results"));
+        assertTrue(results.getText().contains(text),
+            "Expected results to contain '" + text + "' but was '" + results.getText() + "'");
+    }
     
-    
+    @Then("I should not see {string} in the results")
+    public void i_should_not_see_in_the_results(String text) {
+        WebElement results = driver.findElement(By.id("search_results"));
+        assertFalse(results.getText().contains(text),
+            "Results should not contain text: " + text);
+    }
+
+    @Then("I should see the message {string}")
+    public void i_should_see_the_message(String message) {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        WebElement flash = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("flash_message")));
+        assertEquals(message, flash.getText());
+    }
     
 }
